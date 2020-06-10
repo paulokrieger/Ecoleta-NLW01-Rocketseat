@@ -5,7 +5,7 @@ import { FiArrowLeft } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import axios from 'axios';
 
-import { LeafletEvent, LeafletMouseEvent } from 'leaflet';
+import { LeafletMouseEvent } from 'leaflet';
 import api from '../../services/api';
 import logo from '../../assets/logo.svg';
 
@@ -27,21 +27,29 @@ interface IBGECityResponse {
 
 
 const CreatePoint = () => {
+  const history = useHistory();
+
   const [items, setItems] = useState<Item[]>([]);
   const [ufs, setUfs] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
 
   const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
+  const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
 
-  const [formData, setFormData] = useState({ name: '', email: '', whatsapp: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    whatsapp: '',
+    address: '',
+    number: '',
+    neighborhood: ''
+  });
 
   const [selectedUf, setSelectedUf] = useState('0');
   const [selectedCity, setSelectedCity] = useState('0');
-  const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [selectedFile, setSelectedFile] = useState<File>();
 
-  const history = useHistory();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(position => {
@@ -110,7 +118,7 @@ const CreatePoint = () => {
     event.preventDefault();
 
 
-    const { name, email, whatsapp } = formData;
+    const { name, email, whatsapp, address, number, neighborhood } = formData;
     const uf = selectedUf;
     const city = selectedCity;
     const [latitude, longitude] = selectedPosition;
@@ -121,6 +129,9 @@ const CreatePoint = () => {
     data.append('name', name);
     data.append('email', email);
     data.append('whatsapp', whatsapp);
+    data.append('address', address);
+    data.append('number', number);
+    data.append('neighborhood', neighborhood);
     data.append('uf', uf);
     data.append('city', city);
     data.append('latitude', String(latitude));
@@ -165,20 +176,43 @@ const CreatePoint = () => {
               <input type="text" name="whatsapp" id="whatsapp" onChange={handleInputChange}></input>
             </div>
           </div>
-        </fieldset>
-        <fieldset>
-          <legend>
+          <legend className="addressTitle">
             <h2>Endereço</h2>
-            <span>Selecione o endereço no mapa</span>
+            <span>Insira os dados do endereço</span>
           </legend>
-
-          <Map center={initialPosition} zoom={15} onClick={handleMapClick}>
-            <TileLayer
-              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <div className="field">
+            <label htmlFor="address">Logradouro</label>
+            <input
+              type="text"
+              placeholder="Digite aqui a rua/avenida/travessa"
+              name="address"
+              id="address"
+              onChange={handleInputChange}
             />
-            <Marker position={selectedPosition}></Marker>
-          </Map>
+          </div>
+
+          <div className="field-group">
+            <div className="field">
+              <label htmlFor="number">Número</label>
+              <input
+                type="text"
+                placeholder="Digite aqui"
+                name="number"
+                id="number"
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="neighborhood">Bairro</label>
+              <input
+                type="text"
+                placeholder="Digite aqui"
+                name="neighborhood"
+                id="neighborhood"
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
           <div className="field-group">
             <div className="field">
               <label htmlFor="uf">Estado (UF)</label>
@@ -210,6 +244,19 @@ const CreatePoint = () => {
         </fieldset>
         <fieldset>
           <legend>
+            <h2>Localização</h2>
+            <span>Selecione um local no mapa</span>
+          </legend>
+          <Map center={initialPosition} zoom={15} onClick={handleMapClick}>
+            <TileLayer
+              attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={selectedPosition}></Marker>
+          </Map>
+        </fieldset>
+        <fieldset>
+          <legend>
             <h2>Ítens de coleta</h2>
             <span>Selecione um ou mais ítems abaixo</span>
           </legend>
@@ -226,7 +273,6 @@ const CreatePoint = () => {
             ))}
           </ul>
         </fieldset>
-
         <button type="submit">Cadastrar ponto de coleta</button>
       </form>
     </div >

@@ -26,11 +26,18 @@ routes.post(
       whatsapp: Joi.number().required(),
       latitude: Joi.number().required(),
       longitude: Joi.number().required(),
+      address: Joi.string().required(),
+      number: Joi.number().required(),
       city: Joi.string().required(),
+      neighborhood: Joi.string().required(),
       uf: Joi.string().required().max(2),
       items: Joi.string().required(),
-    })
-  }),
+    }),
+  },
+    {
+      abortEarly: false,
+    }
+  ),
   pointsController.create);
 
 
